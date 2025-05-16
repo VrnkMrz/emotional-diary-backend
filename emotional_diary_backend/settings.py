@@ -11,9 +11,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-u%!!0eokrq!+s34nnd%$4jpy4wn7*r_k#n8_7c$w*9ni3hne9@'
 
+AES_ENCRYPTION_KEY_HEX = os.getenv('AES_ENCRYPTION_KEY_HEX')
+
 JWT_SECRET = SECRET_KEY
 JWT_ALGORITHM = 'HS256'
-JWT_EXP_DELTA_HOURS = 1
+JWT_EXP_DELTA_HOURS = 24
 
 DEBUG = True
 
