@@ -92,6 +92,10 @@ class Users(models.Model):
     updated_at = models.DateTimeField()
     nickname = models.CharField(max_length=50, blank=True, null=True)
 
+    @property
+    def is_authenticated(self):
+        return True
+
     class Meta:
         managed = False
         db_table = 'users'
