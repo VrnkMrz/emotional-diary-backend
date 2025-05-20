@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'diary',
     'user',
+    'nlp',
 ]
 
 REST_FRAMEWORK = {

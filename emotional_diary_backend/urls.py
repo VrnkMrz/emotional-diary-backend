@@ -1,4 +1,3 @@
-# emotional_diary_backend/urls.py
 from django.contrib import admin
 from django.urls import path, include
 
@@ -10,4 +9,6 @@ urlpatterns = [
 
     # замість окремих ендпоінтів тут
     path('api/entries/', include('diary.urls')),
+    path('api/nlp/', include('nlp.urls')),
+
 ]

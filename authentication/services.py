@@ -25,4 +25,5 @@ class MailerSendService:
         }
 
         response = self.client.send(mail)
+        print(f"Mail server response: {response}")
         return response 
