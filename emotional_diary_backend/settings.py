@@ -138,3 +138,11 @@ CORS_ALLOW_METHODS = [
     "DELETE",
     "OPTIONS",
 ]
+
+MIGRATION_MODULES = {
+    'core': None,
+    'authentication': None,
+    'diary': None,
+    'report': None,
+    'user': None,
+}

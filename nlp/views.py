@@ -1,18 +1,27 @@
 import os
 import json
 import openai
+import logging
+from typing import List
+import traceback
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, permissions
-from pydantic import BaseModel
+from pydantic import BaseModel, RootModel
 
 from core.models import Emotions
 
-openai.api_key = os.getenv("OPENAI_API_KEY")
-#openai.api_key = "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"
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG)
+
+#openai.api_key = os.getenv("OPENAI_API_KEY")
+openai.api_key = "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"
 
 class EmotionResponse(BaseModel):
     emotion: str
+
+class TwoEmotions(BaseModel):
+    emotions: List[str]
 
 class EmotionClassificationView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -59,3 +68,60 @@ class EmotionClassificationView(APIView):
             {"emotion": emotion_obj.emotion_name},
             status=status.HTTP_200_OK,
         )
+
+class EmotionPredictionView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        text = request.data.get("text")
+
+        if not text:
+            logging.warning("Missing 'text' in request")
+            return Response(
+                {"error": "Поле 'text' є обов'язковим."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            parsed = openai.responses.parse(
+                model="gpt-4o-mini",
+                input=[
+                    {
+                        "role": "system",
+                        "content": (
+                            "Ти — модель, яка аналізує текст і вибирає два найімовірніші "
+                            "емоційні стани з переліку: Гнів, Відраза, Страх, Тривога, Сум, "
+                            "Щастя, Розслаблення, Бажання. "
+                            "Поверни строго JSON-об’єкт виду "
+                            "{\"emotions\":[\"Щастя\",\"Тривога\"]}"
+                        ),
+                    },
+                    {"role": "user", "content": text},
+                ],
+                temperature=0.0,
+                text_format=TwoEmotions,
+            )
+            emotions = parsed.output_parsed.emotions
+
+            if len(emotions) != 2:
+                raise ValueError(f"Очікував 2 емоції, отримав {len(emotions)}: {emotions}")
+
+        except Exception:
+            return Response(
+                {"error": "Не вдалося визначити дві емоції через OpenAI."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        # Шукаємо кожну емоцію в БД і формуємо відповідь
+        result = []
+        for name in emotions:
+            try:
+                emo = Emotions.objects.get(emotion_name__iexact=name)
+            except Emotions.DoesNotExist:
+                return Response(
+                    {"error": f"Невідома емоція: {name}"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            result.append({"emotion": emo.emotion_name})
+
+        return Response(result, status=status.HTTP_200_OK)

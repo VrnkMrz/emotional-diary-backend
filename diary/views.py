@@ -9,11 +9,9 @@ class DiaryEntriesView(ListCreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        # Повертаємо тільки ті записи, де foreign key user == поточний user
         return Diaryentries.objects.filter(user=self.request.user).order_by('-date')
 
     def get_serializer_class(self):
-        # Для GET — "read" серіалізатор, для POST — "write"
         if self.request.method == 'GET':
             return DiaryEntrySerializer
         return DiaryEntryCreateSerializer
