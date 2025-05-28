@@ -6,6 +6,7 @@ import os
 
 MAILERSEND_API_TOKEN = os.environ['MAILERSEND_API_TOKEN']
 MAILERSEND_SENDER     = os.environ['MAILERSEND_SENDER']
+OPENAI_API_KEY      = os.environ['OPENAI_API_KEY']
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -36,6 +37,7 @@ INSTALLED_APPS = [
     'diary',
     'user',
     'nlp',
+    "reports",
 ]
 
 REST_FRAMEWORK = {

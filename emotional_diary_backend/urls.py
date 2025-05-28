@@ -7,8 +7,8 @@ urlpatterns = [
     path('api/auth/', include('authentication.urls')),
     path('api/user/', include('user.urls')),
 
-    # замість окремих ендпоінтів тут
     path('api/entries/', include('diary.urls')),
     path('api/nlp/', include('nlp.urls')),
+    path("api/reports/", include("reports.urls")),
 
 ]

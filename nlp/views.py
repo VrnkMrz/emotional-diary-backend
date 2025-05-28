@@ -3,6 +3,7 @@ import json
 import openai
 import logging
 from typing import List
+from django.conf import settings
 import traceback
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -14,8 +15,9 @@ from core.models import Emotions
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
-#openai.api_key = os.getenv("OPENAI_API_KEY")
-openai.api_key = "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"
+# api_key = MAILERSEND_API_TOKEN
+openai.api_key = settings.OPENAI_API_KEY
+#openai.api_key =
 
 class EmotionResponse(BaseModel):
     emotion: str
@@ -36,7 +38,7 @@ class EmotionClassificationView(APIView):
 
         try:
             response = openai.responses.parse(
-                model="gpt-4o-mini",
+                model="gpt-o4-mini",
                 input=[
                     {
                         "role": "system",
@@ -83,6 +85,7 @@ class EmotionPredictionView(APIView):
             )
 
         try:
+            print("api key:", openai.api_key)
             parsed = openai.responses.parse(
                 model="gpt-4o-mini",
                 input=[
@@ -106,9 +109,9 @@ class EmotionPredictionView(APIView):
             if len(emotions) != 2:
                 raise ValueError(f"Очікував 2 емоції, отримав {len(emotions)}: {emotions}")
 
-        except Exception:
+        except Exception  as e:
             return Response(
-                {"error": "Не вдалося визначити дві емоції через OpenAI."},
+                {"error": "Не вдалося визначити дві емоції через OpenAI. {e}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 

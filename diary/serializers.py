@@ -24,27 +24,22 @@ class DiaryEntrySerializer(serializers.ModelSerializer):
         key = binascii.unhexlify(settings.AES_ENCRYPTION_KEY_HEX)
         aesgcm = AESGCM(key)
 
-        # ciphertext і iv уже bytes(obj.…)
         ciphertext = bytes(obj.encrypted_text)
         iv = bytes(obj.iv)
 
-        # auth_tag може прийти як bytes або як uuid.UUID
         raw_tag = obj.auth_tag
         if isinstance(raw_tag, uuid.UUID):
             tag = raw_tag.bytes
         else:
             tag = bytes(raw_tag)
 
-        # тепер властиво розшифровуємо
         plaintext = aesgcm.decrypt(iv, ciphertext + tag, None)
         return plaintext.decode('utf-8')
 
 class DiaryEntryCreateSerializer(serializers.ModelSerializer):
-    # отримуємо з фронтенду текст уже зашифрованим у hex-рядках
     encrypted_text = serializers.CharField(write_only=True)
     iv             = serializers.CharField(write_only=True)
     auth_tag       = serializers.CharField(write_only=True)
-    # очікуємо id емоцій (user та ai) з фронтенду
     user_emotion = serializers.PrimaryKeyRelatedField(
         queryset=Emotions.objects.all()
     )
@@ -60,7 +55,6 @@ class DiaryEntryCreateSerializer(serializers.ModelSerializer):
         ]
 
     def validate(self, data):
-        # Переконаємося, що фронтенд справді передав і текст, і емоцію
         if not data.get('encrypted_text'):
             raise serializers.ValidationError("Зашифрований текст обовʼязковий.")
         if not data.get('user_emotion'):
@@ -68,10 +62,8 @@ class DiaryEntryCreateSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        # Прив'язуємо поточного користувача
         user = self.context['request'].user
         validated_data['user'] = user
-        # Переводимо hex-рядки у байти для збереження у BinaryField
         validated_data['encrypted_text'] = binascii.unhexlify(
             validated_data.pop('encrypted_text')
         )
@@ -81,7 +73,6 @@ class DiaryEntryCreateSerializer(serializers.ModelSerializer):
         validated_data['auth_tag']       = binascii.unhexlify(
             validated_data.pop('auth_tag')
         )
-        # Дата може прийти з фронтенду або за замовчуванням — сьогодні
         if not validated_data.get('date'):
             validated_data['date'] = serializers.DateField().to_representation(
                 serializers.DateField().to_internal_value(None)
