@@ -54,8 +54,19 @@
 * Безпека: AES-256, bcrypt, JWT, HTTPS, 2FA
 * Інфраструктура: API Gateway (Node.js), розгортання на 3 вузлах (клієнт, вебсервер, сервер БД)
 
-
 ## Тестування
+
+### Cписок технологій і бібліотек:
+
+### Backend:
+* Django REST Framework (APITestCase)
+* unittest.mock
+* bcrypt
+* PyJWT
+
+### Frontend:
+* Cypress (TypeScript)
+
 
 <img width="1017" height="701" alt="image" src="https://github.com/user-attachments/assets/a64e599a-4f9c-423a-a928-abcb79a852c8" />
 <img width="720" height="155" alt="image" src="https://github.com/user-attachments/assets/200fb9d6-0bad-4eb0-928f-9dfb99b7242e" />
